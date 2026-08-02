@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-organic-green: #2D5A27;
+  --color-earth-brown: #8B4513;
+  --color-harvest-yellow: #F4D03F;
+  --color-soil-white: #F9F7F2;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-soil-white text-gray-900 antialiased;
+  }
+}
+
+.rural-card {
+  @apply bg-white rounded-2xl shadow-sm border border-black/5 p-4 transition-all active:scale-95;
+}
+
+.btn-primary {
+  @apply bg-organic-green text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-md active:bg-organic-green/90;
+}
+
+.btn-secondary {
+  @apply bg-earth-brown text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-md active:bg-earth-brown/90;
+}
+
+.btn-accent {
+  @apply bg-harvest-yellow text-organic-green font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-md active:bg-harvest-yellow/90;
+}
+
+.nav-item {
+  @apply flex flex-col items-center justify-center gap-1 text-gray-500 transition-colors;
+}
+
+.nav-item.active {
+  @apply text-organic-green;
+}
+
+/* Custom scrollbar for mobile feel */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2D5A2744;
+  border-radius: 10px;
+}
+

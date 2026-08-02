@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Organic Mitra</string>
+    <string name="title_activity_main">Organic Mitra</string>
+    <string name="package_name">com.organicmitra.app</string>
+    <string name="custom_url_scheme">com.organicmitra.app</string>
+</resources>

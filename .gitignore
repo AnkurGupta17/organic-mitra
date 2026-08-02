@@ -1,0 +1,19 @@
+git statusnode_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+# Android
+android/.gradle/
+android/local.properties
+*.apk
+*.aab
+
+# VS Code
+.vscode/
+
+# OS files
+Thumbs.db

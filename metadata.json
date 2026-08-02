@@ -1,0 +1,6 @@
+{
+  "name": "Organic Mitra",
+  "description": "Smart Guide for Organic Farmers - Empowering Indian farmers with step-by-step organic farming guidance, AI pest detection, and expert connectivity.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
