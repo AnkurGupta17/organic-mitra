@@ -14,7 +14,14 @@ const ai = new GoogleGenAI({
 });
 
 app.get("/", (req, res) => {
-  res.send("Organic Mitra Backend Running");
+  res.status(200).send("Organic Mitra Backend Running");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Organic Mitra backend is healthy",
+  });
 });
 
 app.post("/test", async (req, res) => {
@@ -100,6 +107,6 @@ app.post("/identify", async (req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Organic Mitra backend running on port ${PORT}`);
 });
