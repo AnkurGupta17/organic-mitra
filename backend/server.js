@@ -29,7 +29,7 @@ app.post("/test", async (req, res) => {
     const { prompt } = req.body;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: prompt,
     });
 
@@ -62,7 +62,7 @@ app.post("/identify", async (req, res) => {
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: [
         {
           text: prompt,
