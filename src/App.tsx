@@ -962,108 +962,96 @@ const PestIdentifier = ({ isHindi, onExpertClick }: { isHindi: boolean, onExpert
     reader.readAsDataURL(file);
   };
 
-  const handleIdentify = async (base64Image: string) => {
-    if (!base64Image) return;
-    
-    setAnalyzing(true);
-    setStatus(isHindi ? "AI फोटो का विश्लेषण कर रहा है… (कुछ सेकंड लग सकते हैं)" : "AI is analyzing the photo... (may take a few seconds)");
-    
-    try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("API_KEY_MISSING");
-      }
+ const handleIdentify = async (base64Image: string) => {
+  if (!base64Image) return;
 
-      const ai = new GoogleGenAI({ apiKey });
-      // Using Gemini 3 Flash for maximum stability and speed
-      const model = "gemini-3-flash-preview";
-      
-      const prompt = isHindi 
-        ? `आप एक वरिष्ठ कृषि वैज्ञानिक हैं। इस तस्वीर का बहुत बारीकी से विश्लेषण करें।
-           पौधे के कीटों (जैसे: सफेद मक्खी, महू, मिलीबग, थ्रिप्स) या रोगों (जैसे: झुलसा, चूर्णिल आसिता, रस्ट) की पहचान करें।
-           
-           नियम:
-           1. कीट/रोग का सटीक नाम और सटीकता प्रतिशत (0-100) दें।
-           2. हमेशा एक प्रभावी जैविक (Organic) उपचार विस्तार से बताएं (जैसे नीम का तेल, अग्निस्त्र, ब्रह्मास्त्र का उपयोग)।
-           3. यदि कीट स्पष्ट नहीं है, तो "संभावित" कीट का नाम दें।
-           4. उत्तर केवल JSON फॉर्मेट में दें।`
-        : `You are a senior agricultural scientist. Analyze this photo very closely.
-           Identify common crop pests (Whitefly, Aphids, Mealybug, Thrips) or diseases (Blight, Powdery Mildew, Rust).
-           
-           Rules:
-           1. Provide the exact name and confidence percentage (0-100).
-           2. Always provide a detailed effective Organic remedy (e.g., use of Neem oil, Agnistra, Brahmastra).
-           3. If the pest is not clear, provide a "Probable" identification.
-           4. Respond ONLY in JSON format.`;
+  setAnalyzing(true);
+  setStatus(
+    isHindi
+      ? "AI फोटो का विश्लेषण कर रहा है… (कुछ सेकंड लग सकते हैं)"
+      : "AI is analyzing the photo... (may take a few seconds)"
+  );
 
-      // Ensure base64 data is clean
-      const imageData = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
+  try {
+    // Prepare the image data for the Railway backend
+    const imageData = base64Image.includes(",")
+      ? base64Image.split(",")[1]
+      : base64Image;
 
-      const response = await ai.models.generateContent({
-        model,
-        contents: {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: "image/jpeg",
-                data: imageData
-              }
-            }
-          ]
+    const prompt = isHindi
+      ? `आप एक वरिष्ठ कृषि वैज्ञानिक हैं। इस तस्वीर का बहुत बारीकी से विश्लेषण करें।
+         पौधे के कीटों (जैसे: सफेद मक्खी, महू, मिलीबग, थ्रिप्स) या रोगों (जैसे: झुलसा, चूर्णिल आसिता, रस्ट) की पहचान करें।
+         
+         नियम:
+         1. कीट/रोग का सटीक नाम और सटीकता प्रतिशत (0-100) दें।
+         2. हमेशा एक प्रभावी जैविक (Organic) उपचार विस्तार से बताएं (जैसे नीम का तेल, अग्निस्त्र, ब्रह्मास्त्र का उपयोग)।
+         3. यदि कीट स्पष्ट नहीं है, तो "संभावित" कीट का नाम दें।
+         4. उत्तर केवल JSON फॉर्मेट में दें।`
+      : `You are a senior agricultural scientist. Analyze this photo very closely.
+         Identify common crop pests (Whitefly, Aphids, Mealybug, Thrips) or diseases (Blight, Powdery Mildew, Rust).
+         
+         Rules:
+         1. Provide the exact name and confidence percentage (0-100).
+         2. Always provide a detailed effective Organic remedy (e.g., use of Neem oil, Agnistra, Brahmastra).
+         3. If the pest is not clear, provide a "Probable" identification.
+         4. Respond ONLY in JSON format.`;
+
+    // Send the image and prompt to the Railway backend.
+    const response = await fetch(
+      "https://organic-mitra-production.up.railway.app/identify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              confidence: { type: Type.NUMBER },
-              remedy: { type: Type.STRING }
-            },
-            required: ["name", "confidence", "remedy"]
-          }
-        }
-      });
-
-      const text = response.text;
-      if (!text) throw new Error("EMPTY_RESPONSE");
-      
-      try {
-        const data = JSON.parse(text);
-        setResult(data);
-      } catch (parseErr) {
-        console.error("JSON Parse Error:", text);
-        throw new Error("INVALID_JSON");
+        body: JSON.stringify({
+          prompt,
+          imageData,
+        }),
       }
-    } catch (error: any) {
-      console.error("Identification error:", error);
-      
-      let errorMessage = isHindi 
-        ? "क्षमा करें, AI इस फोटो से समस्या की पहचान नहीं कर सका। कृपया एक साफ़ और नज़दीकी फोटो लें।" 
-        : "Sorry, AI couldn't identify the issue. Please try a clearer close-up shot.";
+    );
 
-      if (error.message === "API_KEY_MISSING") {
-        errorMessage = isHindi 
-          ? "सिस्टम त्रुटि: API की (Key) नहीं मिली। कृपया सेटिंग्स की जांच करें।" 
-          : "System Error: API Key missing. Please check settings.";
-      } else if (error.message === "EMPTY_RESPONSE" || error.message === "INVALID_JSON") {
-        errorMessage = isHindi
-          ? "सर्वर से गलत प्रतिक्रिया मिली। कृपया फिर से कोशिश करें।"
-          : "Invalid response from server. Please try again.";
-      }
+    const serverData = await response.json();
 
-      setResult({
-        name: isHindi ? "पहचान विफल" : "Identification Failed",
-        remedy: errorMessage,
-        confidence: 0
-      });
-    } finally {
-      setAnalyzing(false);
-      setStatus("");
+    if (!response.ok || !serverData.success) {
+      console.error("Railway API Error:", serverData);
+      throw new Error(serverData.error || "SERVER_ERROR");
     }
-  };
 
+    if (!serverData.result) {
+      throw new Error("EMPTY_RESPONSE");
+    }
+
+    // Railway already parsed Gemini's JSON for us.
+    setResult(serverData.result);
+
+  } catch (error: any) {
+    console.error("Identification error:", error);
+
+    let errorMessage = isHindi
+      ? "क्षमा करें, AI इस फोटो से समस्या की पहचान नहीं कर सका। कृपया एक साफ़ और नज़दीकी फोटो लें।"
+      : "Sorry, AI couldn't identify the issue. Please try a clearer close-up shot.";
+
+    if (
+      error.message === "EMPTY_RESPONSE" ||
+      error.message === "SERVER_ERROR"
+    ) {
+      errorMessage = isHindi
+        ? "सर्वर से गलत प्रतिक्रिया मिली। कृपया फिर से कोशिश करें।"
+        : "Invalid response from server. Please try again.";
+    }
+
+    setResult({
+      name: isHindi ? "पहचान विफल" : "Identification Failed",
+      remedy: errorMessage,
+      confidence: 0,
+    });
+  } finally {
+    setAnalyzing(false);
+    setStatus("");
+  }
+};
+     
   return (
     <div className="p-4 pb-24 space-y-6">
       <h2 className="text-2xl font-bold text-organic-green">{isHindi ? 'कीट और रोग पहचान' : 'Pest & Disease ID'}</h2>
