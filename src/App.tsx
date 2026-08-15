@@ -682,7 +682,7 @@ const Dashboard = ({ setScreen, isHindi, onExpertClick }: { setScreen: (s: Scree
           {ATTRIBUTION.ownership}
         </p>
         <p className="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-          Version: 2026-04-16-PROD
+          Version 1.0.0 • August 2026
         </p>
       </div>
     </div>
